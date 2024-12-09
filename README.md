@@ -15,7 +15,7 @@ This action does not produce any direct outputs.
 ## Example Usage
 
 ```yaml
-- uses: pasqualesalza/smart-checkout-action@v1
+- uses: kaiko-ai/smart-checkout-action@v1
   with:
     base-branch: 'main'
     head-branch: 'feature-branch'
