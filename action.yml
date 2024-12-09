@@ -1,0 +1,70 @@
+name: 'Smart Checkout Action'
+description: 'Calculate and fetch the minimum commits for head and base branches to ensure the merge base commit is included'
+
+inputs:
+  base-branch:
+    description: 'The base branch name'
+    required: true
+    default: 'main'
+  head-branch:
+    description: 'The head branch name'
+    required: true
+    default: ${{ github.head_ref || github.ref_name }}
+  lfs:
+    description: 'Whether to use LFS caching'
+    required: true
+    default: 'false'
+  lfs-token:
+    description: 'The GitHub token to use for LFS. Required if pushing in other steps'
+    required: false
+    default: ${{ github.token }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Install GitHub CLI
+      uses: sersoft-gmbh/setup-gh-cli-action@v2
+      with:
+        version: stable
+
+    - name: Calculate the fetch depth for the head and base branches
+      id: fetch_depth
+      shell: bash
+      env:
+        GITHUB_REPOSITORY: ${{ github.repository }}
+        BASE_BRANCH_NAME: ${{ inputs.base-branch }}
+        HEAD_BRANCH_NAME: ${{ inputs.head-branch }}
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        compare_output=$(gh api repos/${GITHUB_REPOSITORY}/compare/${BASE_BRANCH_NAME}...${HEAD_BRANCH_NAME} --jq '{ahead_by: .ahead_by, behind_by: .behind_by}')
+
+        # The number of commits the head branch is behind the base branch.
+        base_depth=$(echo $compare_output | jq -r '. | .behind_by + 1')
+
+        # The number of commits the head branch is ahead of the base branch.
+        head_depth=$(echo $compare_output | jq -r '. | .ahead_by + 1')
+
+        echo "BASE_FETCH_DEPTH=${base_depth}" >> "$GITHUB_ENV"
+        echo "HEAD_FETCH_DEPTH=${head_depth}" >> "$GITHUB_ENV"
+
+    - name: "Checkout the head branch without LFS caching"
+      if: ${{ inputs.lfs == 'false' }}
+      id: git_checkout_no_lfs
+      uses: actions/checkout@v4.2.2
+      with:
+        fetch-depth: ${{ env.HEAD_FETCH_DEPTH }}
+        lfs: false
+
+    - name: "Checkout the head branch with LFS caching"
+      if: ${{ inputs.lfs == 'true' }}
+      id: git_checkout_lfs
+      uses: nschloe/action-cached-lfs-checkout@v1.2.2
+      with:
+        fetch-depth: ${{ env.HEAD_FETCH_DEPTH }}
+        token: ${{ inputs.lfs-token }}
+
+    - name: "Fetch the base branch"
+      shell: bash
+      env:
+        BASE_FETCH_DEPTH: ${{ env.BASE_FETCH_DEPTH }}
+      run: git fetch origin main --depth=${BASE_FETCH_DEPTH}
