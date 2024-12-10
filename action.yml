@@ -62,6 +62,7 @@ runs:
       id: git_checkout_no_lfs
       uses: actions/checkout@v4.2.2
       with:
+        ref: ${{ inputs.head-branch }}
         fetch-depth: ${{ inputs.head-only == 'true' && inputs.head-only-fetch-depth || env.HEAD_FETCH_DEPTH }}
         lfs: false
 
@@ -70,6 +71,7 @@ runs:
       id: git_checkout_lfs
       uses: nschloe/action-cached-lfs-checkout@v1.2.2
       with:
+        ref: ${{ inputs.head-branch }}
         fetch-depth: ${{ inputs.head-only == 'true' && inputs.head-only-fetch-depth || env.HEAD_FETCH_DEPTH }}
         token: ${{ inputs.lfs-token }}
 
