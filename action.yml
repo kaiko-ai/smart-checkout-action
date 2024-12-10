@@ -62,6 +62,7 @@ runs:
       id: git_checkout_no_lfs
       uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.2.2
       with:
+        ref: ${{ inputs.head-branch }}
         fetch-depth: ${{ inputs.head-only == 'true' && inputs.head-only-fetch-depth || env.HEAD_FETCH_DEPTH }}
         lfs: false
 
@@ -70,6 +71,7 @@ runs:
       id: git_checkout_lfs
       uses: kaiko-ai/action-cached-lfs-checkout@ce36e96f02d5a45724f099dfc0df5ebe4d4055fc # v1.2.2-patched
       with:
+        ref: ${{ inputs.head-branch }}
         fetch-depth: ${{ inputs.head-only == 'true' && inputs.head-only-fetch-depth || env.HEAD_FETCH_DEPTH }}
         token: ${{ inputs.lfs-token }}
 
