@@ -79,5 +79,6 @@ runs:
       if: ${{ inputs.head-only == 'false' }}
       shell: bash
       env:
+        BASE_BRANCH_NAME: ${{ inputs.base-branch }}
         BASE_FETCH_DEPTH: ${{ env.BASE_FETCH_DEPTH }}
-      run: git fetch origin main --depth=${BASE_FETCH_DEPTH}
+      run: git fetch origin ${BASE_BRANCH_NAME} --depth=${BASE_FETCH_DEPTH}
