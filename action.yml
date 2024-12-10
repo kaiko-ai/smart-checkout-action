@@ -10,6 +10,15 @@ inputs:
     description: 'The head branch name'
     required: true
     default: ${{ github.head_ref || github.ref_name }}
+  head-only:
+    description: 'Whether to only checkout the head branch'
+    required: true
+    default: 'false'
+  head-only-fetch-depth:
+    description: 'The fetch depth for the head branch when only checking out the head branch'
+    required: false
+    default: '1'
+
   lfs:
     description: 'Whether to use LFS caching'
     required: true
@@ -28,6 +37,7 @@ runs:
         version: stable
 
     - name: Calculate the fetch depth for the head and base branches
+      if: ${{ inputs.head-only == 'false' }}
       id: fetch_depth
       shell: bash
       env:
@@ -52,7 +62,7 @@ runs:
       id: git_checkout_no_lfs
       uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.2.2
       with:
-        fetch-depth: ${{ env.HEAD_FETCH_DEPTH }}
+        fetch-depth: ${{ inputs.head-only == 'true' && inputs.head-only-fetch-depth || env.HEAD_FETCH_DEPTH }}
         lfs: false
 
     - name: "Checkout the head branch with LFS caching"
@@ -60,10 +70,11 @@ runs:
       id: git_checkout_lfs
       uses: kaiko-ai/action-cached-lfs-checkout@ce36e96f02d5a45724f099dfc0df5ebe4d4055fc # v1.2.2-patched
       with:
-        fetch-depth: ${{ env.HEAD_FETCH_DEPTH }}
+        fetch-depth: ${{ inputs.head-only == 'true' && inputs.head-only-fetch-depth || env.HEAD_FETCH_DEPTH }}
         token: ${{ inputs.lfs-token }}
 
     - name: "Fetch the base branch"
+      if: ${{ inputs.head-only == 'false' }}
       shell: bash
       env:
         BASE_FETCH_DEPTH: ${{ env.BASE_FETCH_DEPTH }}
