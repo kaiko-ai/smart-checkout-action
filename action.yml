@@ -93,9 +93,4 @@ runs:
 
     - name: "Show HEAD branch reference"
       shell: bash
-      run: git show-ref ${{ inputs.head-branch }}
-
-    - name: "Show BASE branch reference"
-      if: ${{ inputs.head-only == 'false' }}
-      shell: bash
-      run: git show-ref ${{ inputs.base-branch }}
+      run: git show-ref HEAD
