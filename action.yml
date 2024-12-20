@@ -90,7 +90,3 @@ runs:
     - name: "List fetched commits"
       shell: bash
       run: git log --oneline --decorate --graph --all
-
-    - name: "Show HEAD branch reference"
-      shell: bash
-      run: git show-ref HEAD
