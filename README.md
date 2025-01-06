@@ -19,4 +19,4 @@ This action does not produce any direct outputs.
 ## Example Usage
 
 ```yaml
-- uses: kaiko-ai/smart-checkout-action@v1
+- uses: pasqualesalza/smart-checkout-action@v1
