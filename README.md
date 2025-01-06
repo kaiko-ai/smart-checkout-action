@@ -4,10 +4,11 @@ This GitHub Action calculates and fetches the minimum commits for head and base 
 
 ## Inputs
 
-- `base-branch` (required): The base branch name.
-- `head-branch` (required): The head branch name. Defaults to the current head reference.
-- `head-only` (required): Whether to only checkout the head branch. Defaults to `false`.
-- `head-only-fetch-depth` (optional): The fetch depth for the head branch when only checking out the head branch. Defaults to `1`.
+- `checkout-type` (required): The type of the checkout. Either "branch" or "sha". Defaults to `branch`.
+- `base-branch` (required): The base branch name. Required if `checkout-type=branch`. Defaults to `main`.
+- `head-branch` (required): The head branch name. Required if `checkout-type=branch`. Defaults to the current head reference.
+- `commit` (optional): The commit SHA to checkout. Required if `checkout-type=commit`. Defaults to the current commit SHA.
+- `main-branch` (optional): The main branch name. Required if `checkout-type=commit`. Defaults to `main`.
 - `lfs` (required): Whether to use LFS caching. Defaults to `false`.
 - `lfs-token` (optional): The GitHub token to use for LFS. Required if pushing in other steps. Defaults to the GitHub token.
 
@@ -19,4 +20,3 @@ This action does not produce any direct outputs.
 
 ```yaml
 - uses: pasqualesalza/smart-checkout-action@v1
-```

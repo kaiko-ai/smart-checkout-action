@@ -1,30 +1,36 @@
-name: 'Smart Checkout Action'
-description: 'Calculate and fetch the minimum commits for head and base branches to ensure the merge base commit is included'
+name: "Smart Checkout Action"
+description: "Perform an optimized checkout a repository. In case of checkout-type=branch, it will calculate and fetch the minimum commits for head and base refs to ensure the merge base commit is included. In case of checkout-type=commit, it will checkout the specific commit SHA on the main branch, guaranteeing HEAD is pointing to the commit."
 
 inputs:
-  base-branch:
-    description: 'The base branch name'
+  checkout-type:
+    description: 'The type of the checkout. Either "branch" or "sha"'
     required: true
-    default: 'main'
+    default: "branch"
+
+  base-branch:
+    description: "The base branch name. Required if checkout-type=branch"
+    required: true
+    default: "main"
   head-branch:
-    description: 'The head branch name'
+    description: "The head branch name. Required if checkout-type=branch"
     required: true
     default: ${{ github.head_ref || github.ref_name }}
-  head-only:
-    description: 'Whether to only checkout the head branch'
-    required: true
-    default: 'false'
-  head-only-fetch-depth:
-    description: 'The fetch depth for the head branch when only checking out the head branch'
+
+  commit:
+    description: "The commit SHA to checkout. Required if checkout-type=commit"
     required: false
-    default: '1'
+    default: ${{ github.sha }}
+  main-branch:
+    description: "The main branch name. Required if checkout-type=commit"
+    required: false
+    default: "main"
 
   lfs:
-    description: 'Whether to use LFS caching'
+    description: "Whether to use LFS caching"
     required: true
-    default: 'false'
+    default: "false"
   lfs-token:
-    description: 'The GitHub token to use for LFS. Required if pushing in other steps'
+    description: "The GitHub token to use for LFS. Required if pushing in other steps"
     required: false
     default: ${{ github.token }}
 
@@ -36,8 +42,8 @@ runs:
       with:
         version: stable
 
-    - name: Calculate the fetch depth for the head and base branches
-      if: ${{ inputs.head-only == 'false' }}
+    - name: "[checkout-type=commit] Calculate the fetch depth for the head and base branches"
+      if: ${{ inputs.checkout-type == 'branch' }}
       id: fetch_depth
       shell: bash
       env:
@@ -57,31 +63,56 @@ runs:
         echo "BASE_FETCH_DEPTH=${base_depth}" >> "$GITHUB_ENV"
         echo "HEAD_FETCH_DEPTH=${head_depth}" >> "$GITHUB_ENV"
 
-    - name: "Checkout the head branch without LFS caching"
-      if: ${{ inputs.lfs == 'false' }}
+    - name: "[checkout-type=branch] Checkout the head branch without LFS caching"
+      if: ${{ inputs.checkout-type == 'branch' && inputs.lfs == 'false' }}
       id: git_checkout_no_lfs
       uses: actions/checkout@v4.2.2
       with:
         ref: ${{ inputs.head-branch }}
-        fetch-depth: ${{ inputs.head-only == 'true' && inputs.head-only-fetch-depth || env.HEAD_FETCH_DEPTH }}
+        fetch-depth: ${{ env.HEAD_FETCH_DEPTH }}
         lfs: false
 
-    - name: "Checkout the head branch with LFS caching"
-      if: ${{ inputs.lfs == 'true' }}
+    - name: "[checkout-type=branch] Checkout the head branch with LFS caching"
+      if: ${{ inputs.checkout-type == 'branch' && inputs.lfs == 'true' }}
       id: git_checkout_lfs
-      uses: nschloe/action-cached-lfs-checkout@v1.2.2
+      uses: nschloe/action-cached-lfs-checkout@v1.2.3
       with:
         ref: ${{ inputs.head-branch }}
-        fetch-depth: ${{ inputs.head-only == 'true' && inputs.head-only-fetch-depth || env.HEAD_FETCH_DEPTH }}
+        fetch-depth: ${{ env.HEAD_FETCH_DEPTH }}
         token: ${{ inputs.lfs-token }}
 
-    - name: "Fetch the base branch"
-      if: ${{ inputs.head-only == 'false' }}
+    - name: "[checkout-type=commit] Checkout the main branch without LFS caching"
+      if: ${{ inputs.checkout-type == 'commit' && inputs.lfs == 'false' }}
+      id: git_checkout_no_lfs
+      uses: actions/checkout@v4.2.2
+      with:
+        ref: ${{ inputs.main-branch }}
+        fetch-depth: 0
+        lfs: false
+
+    - name: "[checkout-type=commit] Checkout the main branch with LFS caching"
+      if: ${{ inputs.checkout-type == 'commit' && inputs.lfs == 'true' }}
+      id: git_checkout_lfs
+      uses: nschloe/action-cached-lfs-checkout@v1.2.3
+      with:
+        ref: ${{ inputs.main-branch }}
+        fetch-depth: 0
+        token: ${{ inputs.lfs-token }}
+
+    - name: "[checkout-type=branch] Fetch the base branch"
+      if: ${{ inputs.checkout-type == 'branch'}}
       shell: bash
       env:
         BASE_BRANCH_NAME: ${{ inputs.base-branch }}
         BASE_FETCH_DEPTH: ${{ env.BASE_FETCH_DEPTH }}
       run: git fetch origin ${BASE_BRANCH_NAME} --depth=${BASE_FETCH_DEPTH}
+
+    - name: "[checkout-type=commit] Reset the head to the commit SHA"
+      if: ${{ inputs.checkout-type == 'sha'}}
+      shell: bash
+      env:
+        COMMIT_SHA: ${{ inputs.commit }}
+      run: git reset --hard ${COMMIT_SHA}
 
     - name: "List fetched branches"
       shell: bash
