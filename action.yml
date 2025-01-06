@@ -44,7 +44,6 @@ runs:
 
     - name: "[checkout-type=commit] Calculate the fetch depth for the head and base branches"
       if: ${{ inputs.checkout-type == 'branch' }}
-      id: fetch_depth
       shell: bash
       env:
         GITHUB_REPOSITORY: ${{ github.repository }}
@@ -65,7 +64,6 @@ runs:
 
     - name: "[checkout-type=branch] Checkout the head branch without LFS caching"
       if: ${{ inputs.checkout-type == 'branch' && inputs.lfs == 'false' }}
-      id: git_checkout_no_lfs
       uses: actions/checkout@v4.2.2
       with:
         ref: ${{ inputs.head-branch }}
@@ -74,7 +72,6 @@ runs:
 
     - name: "[checkout-type=branch] Checkout the head branch with LFS caching"
       if: ${{ inputs.checkout-type == 'branch' && inputs.lfs == 'true' }}
-      id: git_checkout_lfs
       uses: nschloe/action-cached-lfs-checkout@v1.2.3
       with:
         ref: ${{ inputs.head-branch }}
@@ -83,7 +80,6 @@ runs:
 
     - name: "[checkout-type=commit] Checkout the main branch without LFS caching"
       if: ${{ inputs.checkout-type == 'commit' && inputs.lfs == 'false' }}
-      id: git_checkout_no_lfs
       uses: actions/checkout@v4.2.2
       with:
         ref: ${{ inputs.main-branch }}
@@ -92,7 +88,6 @@ runs:
 
     - name: "[checkout-type=commit] Checkout the main branch with LFS caching"
       if: ${{ inputs.checkout-type == 'commit' && inputs.lfs == 'true' }}
-      id: git_checkout_lfs
       uses: nschloe/action-cached-lfs-checkout@v1.2.3
       with:
         ref: ${{ inputs.main-branch }}
