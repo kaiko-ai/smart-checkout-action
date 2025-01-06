@@ -3,7 +3,7 @@ description: "Perform an optimized checkout a repository. In case of checkout-ty
 
 inputs:
   checkout-type:
-    description: 'The type of the checkout. Either "branch" or "sha"'
+    description: 'The type of the checkout. Either "branch" or "commit"'
     required: true
     default: "branch"
 
@@ -108,7 +108,7 @@ runs:
       run: git fetch origin ${BASE_BRANCH_NAME} --depth=${BASE_FETCH_DEPTH}
 
     - name: "[checkout-type=commit] Reset the head to the commit SHA"
-      if: ${{ inputs.checkout-type == 'sha'}}
+      if: ${{ inputs.checkout-type == 'commit'}}
       shell: bash
       env:
         COMMIT_SHA: ${{ inputs.commit }}
