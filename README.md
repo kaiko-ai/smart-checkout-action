@@ -10,7 +10,7 @@ This GitHub Action calculates and fetches the minimum commits for head and base 
 - `commit` (optional): The commit SHA to checkout. Required if `checkout-type=commit`. Defaults to the current commit SHA.
 - `main-branch` (optional): The main branch name. Required if `checkout-type=commit`. Defaults to `main`.
 - `lfs` (required): Whether to use LFS caching. Defaults to `false`.
-- `lfs-token` (optional): The GitHub token to use for LFS. Required if pushing in other steps. Defaults to the GitHub token.
+- `token` (optional): The PAT GitHub token. Required to run authenticated git commands in other steps. Defaults to `${{ github.token }}`.
 
 ## Outputs
 
