@@ -38,11 +38,6 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Install GitHub CLI
-      uses: sersoft-gmbh/setup-gh-cli-action@v2
-      with:
-        version: stable
-
     - name: "[checkout-type=commit] Calculate the fetch depth for the head and base branches"
       if: ${{ inputs.checkout-type == 'branch' }}
       shell: bash
