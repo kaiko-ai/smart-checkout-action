@@ -29,8 +29,9 @@ inputs:
     description: "Whether to use LFS caching"
     required: true
     default: "false"
-  lfs-token:
-    description: "The GitHub token to use for LFS. Required if pushing in other steps"
+
+  token:
+    description: "The PAT GitHub token. Required to run authenticated git commands in other steps"
     required: false
     default: ${{ github.token }}
 
@@ -69,6 +70,7 @@ runs:
         ref: ${{ inputs.head-branch }}
         fetch-depth: ${{ env.HEAD_FETCH_DEPTH }}
         lfs: false
+        token: ${{ inputs.token }}
 
     - name: "[checkout-type=branch] Checkout the head branch with LFS caching"
       if: ${{ inputs.checkout-type == 'branch' && inputs.lfs == 'true' }}
@@ -76,7 +78,7 @@ runs:
       with:
         ref: ${{ inputs.head-branch }}
         fetch-depth: ${{ env.HEAD_FETCH_DEPTH }}
-        token: ${{ inputs.lfs-token }}
+        token: ${{ inputs.token }}
 
     - name: "[checkout-type=commit] Checkout the main branch without LFS caching"
       if: ${{ inputs.checkout-type == 'commit' && inputs.lfs == 'false' }}
@@ -85,6 +87,7 @@ runs:
         ref: ${{ inputs.main-branch }}
         fetch-depth: 0
         lfs: false
+        token: ${{ inputs.token }}
 
     - name: "[checkout-type=commit] Checkout the main branch with LFS caching"
       if: ${{ inputs.checkout-type == 'commit' && inputs.lfs == 'true' }}
@@ -92,7 +95,7 @@ runs:
       with:
         ref: ${{ inputs.main-branch }}
         fetch-depth: 0
-        token: ${{ inputs.lfs-token }}
+        token: ${{ inputs.token }}
 
     - name: "[checkout-type=branch] Fetch the base branch"
       if: ${{ inputs.checkout-type == 'branch'}}
