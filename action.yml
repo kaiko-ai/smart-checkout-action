@@ -109,7 +109,7 @@ runs:
 
     - name: "List fetched branches"
       shell: bash
-      run:
+      run: |
         echo "::group::Fetched branches"
         git branch -r
         echo "::endgroup::"
@@ -117,7 +117,7 @@ runs:
 
     - name: "List fetched commits"
       shell: bash
-      run:
+      run: |
         echo "::group::Fetched commits"
         git log --oneline --decorate --graph --all
         echo "::endgroup::"
