@@ -38,7 +38,7 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: "[checkout-type=commit] Calculate the fetch depth for the head and base branches"
+    - name: "[checkout-type=branch] Calculate the fetch depth for the head and base branches"
       if: ${{ inputs.checkout-type == 'branch' }}
       shell: bash
       env:
@@ -109,8 +109,15 @@ runs:
 
     - name: "List fetched branches"
       shell: bash
-      run: git branch -r
+      run:
+        echo "::group::Fetched branches"
+        git branch -r
+        echo "::endgroup::"
+
 
     - name: "List fetched commits"
       shell: bash
-      run: git log --oneline --decorate --graph --all
+      run:
+        echo "::group::Fetched commits"
+        git log --oneline --decorate --graph --all
+        echo "::endgroup::"
